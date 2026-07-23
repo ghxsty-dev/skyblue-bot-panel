@@ -1,15 +1,8 @@
-const { db, initDB } = require('../../lib/database');
-const { signToken, setAuthCookie } = require('../../lib/auth');
-
-let dbReady = false;
+const { ensureDB, signToken, db } = require('../_lib');
 
 module.exports = async function handler(req, res) {
   try {
-    if (!dbReady) {
-      await initDB();
-      dbReady = true;
-    }
-
+    await ensureDB();
     const { code } = req.query;
     if (!code) return res.redirect('/');
 
@@ -25,10 +18,7 @@ module.exports = async function handler(req, res) {
       }).toString(),
     });
     const tokenData = await tokenRes.json();
-
-    if (tokenData.error) {
-      return res.redirect('/?error=token_failed');
-    }
+    if (tokenData.error) return res.redirect('/?error=token_failed');
 
     const userRes = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
@@ -45,22 +35,19 @@ module.exports = async function handler(req, res) {
       : `https://cdn.discordapp.com/embed/avatars/${parseInt(userData.discriminator || '0') % 5}.png`;
 
     const userObj = {
-      id: userData.id,
-      username: userData.username,
-      discriminator: userData.discriminator,
-      avatar: avatarUrl,
-      guilds: guilds.filter(g => (g.permissions & 0x20) === 0x20),
+      id: userData.id, username: userData.username, discriminator: userData.discriminator,
+      avatar: avatarUrl, guilds: guilds.filter(g => (g.permissions & 0x20) === 0x20),
     };
 
     const token = signToken(userObj);
-    setAuthCookie(res, token);
+    res.setHeader('Set-Cookie', `sb_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*60*60}`);
 
     await db.upsertUser(userData.id, userData.username, avatarUrl, userData.discriminator, tokenData.access_token, tokenData.refresh_token);
     await db.addLog('login', userData.id, userData.username, 'Panel girişi yapıldı');
 
     res.redirect('/dashboard');
   } catch (err) {
-    console.error('OAuth error:', err.message, err.stack);
+    console.error('OAuth error:', err.message);
     res.redirect('/?error=auth_failed');
   }
 };
