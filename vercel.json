@@ -3,13 +3,12 @@
   "routes": [
     { "src": "/css/(.*)", "dest": "/public/css/$1" },
     { "src": "/js/(.*)", "dest": "/public/js/$1" },
-    { "src": "/", "dest": "/pages/login.html" },
-    { "src": "/login", "dest": "/pages/login.html" },
-    { "src": "/dashboard", "dest": "/pages/dashboard.html" },
-    { "src": "/commands/new", "dest": "/pages/command-edit.html" },
-    { "src": "/commands/edit", "dest": "/pages/command-edit.html" },
-    { "src": "/commands", "dest": "/pages/commands.html" },
-    { "src": "/settings", "dest": "/pages/settings.html" },
-    { "src": "/logs", "dest": "/pages/logs.html" }
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/commands/new", "dest": "/command-edit.html" },
+    { "src": "/commands/edit", "dest": "/command-edit.html" },
+    { "src": "/commands", "dest": "/commands.html" },
+    { "src": "/settings", "dest": "/settings.html" },
+    { "src": "/logs", "dest": "/logs.html" },
+    { "src": "/(.*)", "dest": "/login.html" }
   ]
 }
