@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/dashboard.html"
+    },
+    {
+      "src": "/commands/new",
+      "dest": "/command-edit.html"
+    },
+    {
+      "src": "/commands/edit",
+      "dest": "/command-edit.html"
+    },
+    {
+      "src": "/commands",
+      "dest": "/commands.html"
+    },
+    {
+      "src": "/settings",
+      "dest": "/settings.html"
+    },
+    {
+      "src": "/logs",
+      "dest": "/logs.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/login.html"
+    }
+  ]
+}

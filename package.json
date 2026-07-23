@@ -1,16 +1,13 @@
 {
   "name": "skyblue-panel",
   "version": "1.0.0",
-  "description": "SkyBlue Discord Bot Panel (Vercel)",
+  "description": "SkyBlue Discord Bot Panel",
   "scripts": {
-    "dev": "vercel dev"
+    "build": "echo done"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^2.7.0"
-  },
-  "devDependencies": {
-    "vercel": "^37.0.0"
   }
 }
