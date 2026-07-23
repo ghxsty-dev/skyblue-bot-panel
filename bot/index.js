@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, EmbedBuilder, REST, Routes, SlashCommandBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const db = require('./database');
 
 const client = new Client({
@@ -37,6 +37,68 @@ async function updateBotStatus() {
   });
 }
 
+function buildButtons(buttonsJson, commandName) {
+  try {
+    const buttons = JSON.parse(buttonsJson || '[]');
+    if (!buttons.length) return [];
+
+    const styleMap = {
+      primary: ButtonStyle.Primary,
+      secondary: ButtonStyle.Secondary,
+      success: ButtonStyle.Success,
+      danger: ButtonStyle.Danger,
+      link: ButtonStyle.Link,
+    };
+
+    const rows = [];
+    for (let i = 0; i < buttons.length; i += 5) {
+      const row = new ActionRowBuilder();
+      const chunk = buttons.slice(i, i + 5);
+      chunk.forEach((b, idx) => {
+        const style = styleMap[b.style] || ButtonStyle.Primary;
+        const btn = new ButtonBuilder()
+          .setStyle(style);
+
+        if (b.label) btn.setLabel(b.label);
+        if (b.emoji) btn.setEmoji(b.emoji);
+
+        if (b.style === 'link') {
+          if (b.url) btn.setURL(b.url);
+          else btn.setURL('https://placeholder.com');
+        } else {
+          btn.setCustomId(`cmd_${commandName}_${i + idx}`);
+        }
+
+        row.addComponents(btn);
+      });
+      rows.push(row);
+    }
+    return rows;
+  } catch (e) {
+    return [];
+  }
+}
+
+function buildReplyContent(command, interaction) {
+  const components = buildButtons(command.buttons, command.name);
+
+  if (command.response_type === 'embed') {
+    const embed = new EmbedBuilder()
+      .setColor(command.embed_color || '#06b6d4')
+      .setDescription(command.embed_description || command.response);
+    if (command.embed_title) embed.setTitle(command.embed_title);
+    if (command.embed_image) embed.setImage(command.embed_image);
+    if (command.embed_footer) embed.setFooter({ text: command.embed_footer });
+    const result = { embeds: [embed] };
+    if (components.length) result.components = components;
+    return result;
+  }
+
+  const result = { content: command.response || 'Komut yanıtı tanımlanmamış.' };
+  if (components.length) result.components = components;
+  return result;
+}
+
 async function deployCommands() {
   const commands = await db.getAllCommands();
   const slashCommands = commands.map(cmd => {
@@ -57,6 +119,34 @@ async function deployCommands() {
 }
 
 client.on('interactionCreate', async (interaction) => {
+  if (interaction.isButton()) {
+    const parts = interaction.customId.split('_');
+    if (parts[0] === 'cmd') {
+      const cmdName = parts[1];
+      const btnIdx = parseInt(parts[2]);
+      const command = await db.getCommandByName(cmdName);
+      if (!command) return;
+
+      try {
+        const buttons = JSON.parse(command.buttons || '[]');
+        const btn = buttons[btnIdx];
+        if (!btn || btn.style === 'link') return;
+
+        if (btn.action_type === 'embed_reply') {
+          const embed = new EmbedBuilder()
+            .setColor(command.embed_color || '#06b6d4')
+            .setDescription(btn.action_content || 'Buton yanıtı');
+          return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+
+        return interaction.reply({ content: btn.action_content || 'Butona basıldı!', ephemeral: true });
+      } catch (e) {
+        return interaction.reply({ content: '❌ Bir hata oluştu.', ephemeral: true });
+      }
+    }
+    return;
+  }
+
   if (!interaction.isChatInputCommand()) return;
 
   const command = await db.getCommandByName(interaction.commandName);
@@ -81,17 +171,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   try {
-    let replyContent;
-    if (command.response_type === 'embed') {
-      const embed = new EmbedBuilder()
-        .setColor(command.embed_color || '#06b6d4')
-        .setDescription(command.embed_description || command.response);
-      if (command.embed_title) embed.setTitle(command.embed_title);
-      if (command.embed_image) embed.setImage(command.embed_image);
-      replyContent = { embeds: [embed] };
-    } else {
-      replyContent = { content: command.response || 'Komut yanıtı tanımlanmamış.' };
-    }
+    const replyContent = buildReplyContent(command, interaction);
 
     if (command.delete_command && interaction.deferred) {
       await interaction.editReply(replyContent);

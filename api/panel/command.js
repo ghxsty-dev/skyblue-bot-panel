@@ -23,7 +23,9 @@ module.exports = async function handler(req, res) {
       description: req.body.description || '', response: req.body.response || '',
       response_type: req.body.response_type || 'text', embed_title: req.body.embed_title || '',
       embed_description: req.body.embed_description || '', embed_color: req.body.embed_color || '#06b6d4',
-      embed_image: req.body.embed_image || '', enabled: req.body.enabled ? 1 : 0,
+      embed_image: req.body.embed_image || '', embed_footer: req.body.embed_footer || '',
+      buttons: typeof req.body.buttons === 'string' ? req.body.buttons : JSON.stringify(req.body.buttons || []),
+      enabled: req.body.enabled ? 1 : 0,
       cooldown: parseInt(req.body.cooldown) || 0, required_role: req.body.required_role || '',
       delete_command: req.body.delete_command ? 1 : 0,
     };

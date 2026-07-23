@@ -22,18 +22,19 @@
           <a href="/logs" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Loglar</a>
         </div>
       </nav>
-      <div class="sidebar-user" id="sidebarUser"><div class="sidebar-user-avatar" id="userAvatar"></div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Yükleniyor...</div><div class="sidebar-user-id" id="userId"></div></div><a href="/api/auth/logout" class="sidebar-logout" title="Çıkış Yap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a></div>
+      <div class="sidebar-user"><div class="sidebar-user-avatar" id="userAvatar"></div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Yükleniyor...</div><div class="sidebar-user-id" id="userId"></div></div><a href="/api/auth/logout" class="sidebar-logout" title="Çıkış Yap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a></div>
     </aside>
     <main class="main-content">
       <div class="page-header fade-in">
         <div style="display: flex; align-items: center; gap: 12px;">
           <a href="/commands" class="btn-icon">←</a>
-          <div><h1 class="page-title" id="pageTitle">Yeni Komut Oluştur</h1><p class="page-subtitle" id="pageSubtitle">Komutunuzu yapılandırın</p></div>
+          <div><h1 class="page-title" id="pageTitle">Yeni Komut Oluştur</h1><p class="page-subtitle">Komutunuzu yapılandırın</p></div>
         </div>
       </div>
       <div id="errorAlert"></div>
       <form id="cmdForm" onsubmit="saveCommand(event)">
         <input type="hidden" id="cmdId" value="">
+
         <div class="card fade-in" style="margin-bottom: 20px;">
           <div class="card-header"><span class="card-title">📋 Temel Bilgiler</span></div>
           <div style="padding: 20px 24px;">
@@ -51,11 +52,12 @@
             </div>
           </div>
         </div>
+
         <div class="card fade-in" style="margin-bottom: 20px;">
           <div class="card-header"><span class="card-title">💬 Yanıt Ayarları</span></div>
           <div style="padding: 20px 24px;">
             <div class="form-group"><label class="form-label">Yanıt Tipi</label>
-              <select id="cmdType" class="form-select" onchange="toggleEmbed()">
+              <select id="cmdType" class="form-select" onchange="toggleType()">
                 <option value="text">Metin</option>
                 <option value="embed">Embed (Zengin Mesaj)</option>
               </select>
@@ -67,10 +69,29 @@
                 <div class="form-group"><label class="form-label">Embed Renk</label><input type="color" id="cmdEmbedColor" class="form-input" value="#06b6d4" style="height:42px;padding:4px;"></div>
               </div>
               <div class="form-group"><label class="form-label">Embed Açıklama</label><textarea id="cmdEmbedDesc" class="form-textarea" placeholder="Embed açıklaması..."></textarea></div>
-              <div class="form-group"><label class="form-label">Embed Görsel URL</label><input type="url" id="cmdEmbedImage" class="form-input" placeholder="https://..."></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Embed Görsel URL</label><input type="url" id="cmdEmbedImage" class="form-input" placeholder="https://..."></div>
+                <div class="form-group"><label class="form-label">Embed Footer</label><input type="text" id="cmdEmbedFooter" class="form-input" placeholder="Footer yazısı"></div>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="card fade-in" style="margin-bottom: 20px;">
+          <div class="card-header">
+            <span class="card-title">🔘 Butonlar (Components v2)</span>
+            <button type="button" class="btn btn-primary btn-sm" onclick="addButton()">+ Buton Ekle</button>
+          </div>
+          <div style="padding: 20px 24px;">
+            <div class="form-hint" style="margin-bottom: 12px;">Buton satırı başına en fazla 5 buton ekleyebilirsiniz. Link butonları URL açar, aksiyon butonları yanıt gönderir.</div>
+            <div id="buttonsList"></div>
+            <div id="buttonPreview" style="margin-top: 16px; display: none;">
+              <div class="form-label" style="margin-bottom: 8px;">Önizleme:</div>
+              <div id="previewRow" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            </div>
+          </div>
+        </div>
+
         <div style="display: flex; gap: 12px; justify-content: flex-end;">
           <a href="/commands" class="btn btn-secondary">İptal</a>
           <button type="submit" class="btn btn-primary">💾 Kaydet</button>
@@ -78,8 +99,27 @@
       </form>
     </main>
   </div>
+
+  <style>
+    .button-item { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; }
+    .button-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .button-item-num { font-weight: 600; color: var(--turkuaz); font-size: 13px; }
+    .preview-btn { padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 600; border: none; cursor: default; }
+    .preview-btn.primary { background: #5865F2; color: white; }
+    .preview-btn.secondary { background: #4E5058; color: white; }
+    .preview-btn.success { background: #248046; color: white; }
+    .preview-btn.danger { background: #D83C3E; color: white; }
+    .preview-btn.link { background: transparent; color: #00AFF4; text-decoration: underline; border: none; }
+    .button-action-group { margin-top: 10px; padding: 12px; background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.15); border-radius: 8px; }
+  </style>
+
   <script>
     let isEdit = false;
+    let buttons = [];
+
+    const STYLES = { primary: { label: 'Primary (Blurple)', color: '#5865F2' }, secondary: { label: 'Secondary (Gri)', color: '#4E5058' }, success: { label: 'Success (Yeşil)', color: '#248046' }, danger: { label: 'Danger (Kırmızı)', color: '#D83C3E' }, link: { label: 'Link (URL)', color: '#00AFF4' } };
+    const EMOJIS = ['🔗','📋','✅','❌','⭐','🎮','🎵','📢','💎','🔥','🚀','💰','🎯','🛡️','⚡'];
+
     async function init() {
       try {
         const uRes = await fetch('/api/panel/dashboard');
@@ -89,6 +129,7 @@
         document.getElementById('userId').textContent = 'ID: ' + uData.user.id;
         document.getElementById('userAvatar').innerHTML = `<img src="${uData.user.avatar}" style="width:100%;height:100%;border-radius:50%;">`;
       } catch(e) { window.location.href = '/'; }
+
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
       if (id) {
@@ -111,15 +152,111 @@
           document.getElementById('cmdEmbedColor').value = c.embed_color || '#06b6d4';
           document.getElementById('cmdEmbedDesc').value = c.embed_description || '';
           document.getElementById('cmdEmbedImage').value = c.embed_image || '';
-          toggleEmbed();
+          document.getElementById('cmdEmbedFooter').value = c.embed_footer || '';
+          try { buttons = JSON.parse(c.buttons || '[]'); } catch(e) { buttons = []; }
+          toggleType();
+          renderButtons();
         }
       }
     }
-    function toggleEmbed() {
+
+    function toggleType() {
       const t = document.getElementById('cmdType').value;
       document.getElementById('textFields').style.display = t === 'text' ? 'block' : 'none';
       document.getElementById('embedFields').style.display = t === 'embed' ? 'block' : 'none';
     }
+
+    function addButton() {
+      if (buttons.length >= 25) return alert('En fazla 25 buton ekleyebilirsiniz.');
+      buttons.push({ label: '', style: 'primary', url: '', emoji: '', action_type: 'reply', action_content: '' });
+      renderButtons();
+    }
+
+    function removeButton(i) {
+      buttons.splice(i, 1);
+      renderButtons();
+    }
+
+    function moveButton(i, dir) {
+      const j = i + dir;
+      if (j < 0 || j >= buttons.length) return;
+      [buttons[i], buttons[j]] = [buttons[j], buttons[i]];
+      renderButtons();
+    }
+
+    function updateButton(i, field, value) {
+      buttons[i][field] = value;
+      renderPreview();
+    }
+
+    function renderButtons() {
+      const container = document.getElementById('buttonsList');
+      if (buttons.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Henüz buton eklenmemiş</div>';
+        document.getElementById('buttonPreview').style.display = 'none';
+        return;
+      }
+      container.innerHTML = buttons.map((b, i) => `
+        <div class="button-item">
+          <div class="button-item-header">
+            <span class="button-item-num">Buton ${i + 1}</span>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn-icon" onclick="moveButton(${i},-1)" title="Yukarı">↑</button>
+              <button type="button" class="btn-icon" onclick="moveButton(${i},1)" title="Aşağı">↓</button>
+              <button type="button" class="btn-icon danger" onclick="removeButton(${i})" title="Sil">🗑️</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Buton Metni</label><input type="text" class="form-input" value="${escHtml(b.label)}" placeholder="Buton yazısı" oninput="updateButton(${i},'label',this.value)"></div>
+            <div class="form-group"><label class="form-label">Stil</label>
+              <select class="form-select" onchange="updateButton(${i},'style',this.value)">
+                ${Object.entries(STYLES).map(([k,v]) => `<option value="${k}" ${b.style===k?'selected':''}>${v.label}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Emoji (isteğe bağlı)</label>
+              <select class="form-select" onchange="updateButton(${i},'emoji',this.value)">
+                <option value="">Yok</option>
+                ${EMOJIS.map(e => `<option value="${e}" ${b.emoji===e?'selected':''}>${e}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              ${b.style === 'link' ?
+                `<label class="form-label">URL</label><input type="url" class="form-input" value="${escHtml(b.url)}" placeholder="https://..." oninput="updateButton(${i},'url',this.value)">` :
+                `<label class="form-label">Aksiyon</label>
+                <select class="form-select" onchange="updateButton(${i},'action_type',this.value)">
+                  <option value="reply" ${b.action_type==='reply'?'selected':''}>Yanıt Gönder</option>
+                  <option value="embed_reply" ${b.action_type==='embed_reply'?'selected':''}>Embed Yanıt Gönder</option>
+                </select>`
+              }
+            </div>
+          </div>
+          ${b.style !== 'link' ? `
+          <div class="button-action-group">
+            <div class="form-group"><label class="form-label">Butona Basılınca</label><textarea class="form-textarea" style="min-height:60px;" placeholder="Yanıt metni veya embed açıklama..." oninput="updateButton(${i},'action_content',this.value)">${escHtml(b.action_content||'')}</textarea></div>
+          </div>` : ''}
+        </div>
+      `).join('');
+      renderPreview();
+    }
+
+    function renderPreview() {
+      const preview = document.getElementById('previewRow');
+      const container = document.getElementById('buttonPreview');
+      if (buttons.length === 0) { container.style.display = 'none'; return; }
+      container.style.display = 'block';
+      const rows = [];
+      for (let i = 0; i < buttons.length; i += 5) rows.push(buttons.slice(i, i + 5));
+      preview.innerHTML = rows.map(row =>
+        `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;background:var(--bg-secondary);padding:8px 12px;border-radius:8px;">${row.map(b =>
+          `<span class="preview-btn ${b.style}">${b.emoji ? b.emoji+' ' : ''}${escHtml(b.label||'Buton')}</span>`
+        ).join('')}</div>`
+      ).join('');
+    }
+
+    function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
     async function saveCommand(e) {
       e.preventDefault();
       const body = {
@@ -131,6 +268,8 @@
         embed_description: document.getElementById('cmdEmbedDesc').value,
         embed_color: document.getElementById('cmdEmbedColor').value,
         embed_image: document.getElementById('cmdEmbedImage').value,
+        embed_footer: document.getElementById('cmdEmbedFooter').value,
+        buttons: buttons,
         enabled: document.getElementById('cmdEnabled').checked,
         cooldown: parseInt(document.getElementById('cmdCooldown').value) || 0,
         required_role: document.getElementById('cmdRole').value,
