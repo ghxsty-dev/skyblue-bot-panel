@@ -433,6 +433,7 @@
     }
 
     function selectComponent(id) {
+      if (selectedComponentId === id) return;
       selectedComponentId = id;
       renderComponents();
       renderComponentEditor();
@@ -456,20 +457,22 @@
       const typeLabels = { container:'📦 Container', section:'📖 Section', text:'📝 Text', media_gallery:'🖼 MediaGallery', separator:'➖ Separator', button:'🔘 Button' };
       const typeColors = { container:'var(--turkuaz)', section:'#a78bfa', text:'#fbbf24', media_gallery:'#f472b6', separator:'#6b7280', button:'#10b981' };
       const sel = selectedComponentId === comp.id ? ' selected' : '';
-      let html = '<div class="component-item'+sel+'" onclick="selectComponent('+comp.id+')">'
+      let subText = '';
+      if (comp.type === 'text') subText = (comp.content||'').substring(0,40) || 'Boş metin';
+      else if (comp.type === 'section') subText = (comp.text||'').substring(0,40) || 'Boş bölüm';
+      else if (comp.type === 'button') subText = (comp.label||'Buton') + ' · ' + comp.style;
+      else if (comp.type === 'media_gallery') subText = (comp.items||[]).length + ' görsel';
+      else if (comp.type === 'container') subText = (comp.components||[]).length + ' alt bileşen';
+      else if (comp.type === 'separator') subText = comp.spacing || 'default';
+      let html = '<div class="component-item'+sel+'" data-id="'+comp.id+'" onclick="selectComponent('+comp.id+')">'
         + '<div class="component-header">'
         + '<span class="component-type" style="color:'+typeColors[comp.type]+'">'+typeLabels[comp.type]+'</span>'
         + '<div class="component-actions">'
         + '<button onclick="event.stopPropagation();moveComponent('+comp.id+',-1)" title="Yukarı">↑</button>'
         + '<button onclick="event.stopPropagation();moveComponent('+comp.id+',1)" title="Aşağı">↓</button>'
         + '<button class="danger" onclick="event.stopPropagation();removeComponent('+comp.id+')" title="Sil">✕</button>'
-        + '</div></div>';
-      if (comp.type === 'button') {
-        html += '<div style="font-size:11px;color:var(--text-muted)">'
-          + (comp.label||'') + ' '
-          + '<span style="background:var(--bg-input);padding:1px 4px;border-radius:3px;font-size:10px">'+comp.style+'</span>'
-          + '</div>';
-      }
+        + '</div></div>'
+        + '<div class="comp-sub" style="font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+subText+'</div>';
       if (comp.type === 'container' && comp.components && comp.components.length) {
         html += '<div class="component-child-list">' + comp.components.map(ch => renderComponentItem(ch)).join('') + '</div>';
       }
@@ -478,9 +481,9 @@
     }
 
     function renderComponentEditor() {
-      removeEditor();
+      const existing = document.getElementById('componentEditor');
       const comp = findComponent(selectedComponentId);
-      if (!comp) return;
+      if (!comp) { if (existing) existing.remove(); return; }
       let html = '';
       if (comp.type === 'container') {
         html = '<div class="editor-title">📦 Container Ayarları</div>'
@@ -493,17 +496,17 @@
       } else if (comp.type === 'section') {
         html = '<div class="editor-title">📖 Section Ayarları</div>'
           + '<div class="field-group"><div class="field-label">Metin</div>'
-          + '<textarea class="field-input field-textarea" oninput="updateCompField('+comp.id+',\'text\',this.value)">'+(comp.text||'')+'</textarea></div>'
+          + '<textarea id="editorField_text" class="field-input field-textarea" oninput="updateCompField('+comp.id+',\'text\',this.value)">'+escHtml(comp.text||'')+'</textarea></div>'
           + '<div class="field-group"><div class="field-label">Thumbnail URL</div>'
-          + '<input type="url" class="field-input" value="'+(comp.thumbnail||'')+'" onchange="updateCompField('+comp.id+',\'thumbnail\',this.value)" placeholder="https://..."></div>'
+          + '<input id="editorField_thumbnail" type="url" class="field-input" value="'+escAttr(comp.thumbnail||'')+'" onchange="updateCompField('+comp.id+',\'thumbnail\',this.value)" placeholder="https://..."></div>'
           + '<div class="section-btn-toggle '+(comp.button?'active':'')+'" onclick="toggleSectionButton('+comp.id+')">'
           + (comp.button ? '🔘 Buton Aktif — Düzenlemek için tıklayın' : '+ Section\'a Buton Ekle')
           + '</div>';
         if (comp.button) {
           html += '<div class="inline-btn-editor">'
             + '<div class="field-row">'
-            + '<div class="field-group"><div class="field-label">Buton Etiket</div><input type="text" class="field-input" value="'+(comp.button.label||'')+'" oninput="updateSectionButton('+comp.id+',\'label\',this.value)"></div>'
-            + '<div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input" value="'+(comp.button.emoji||'')+'" oninput="updateSectionButton('+comp.id+',\'emoji\',this.value)" placeholder="👋"></div>'
+            + '<div class="field-group"><div class="field-label">Buton Etiket</div><input type="text" class="field-input" value="'+escAttr(comp.button.label||'')+'" oninput="updateSectionButton('+comp.id+',\'label\',this.value)"></div>'
+            + '<div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input" value="'+escAttr(comp.button.emoji||'')+'" oninput="updateSectionButton('+comp.id+',\'emoji\',this.value)" placeholder="👋"></div>'
             + '</div>'
             + '<div class="field-row">'
             + '<div class="field-group"><div class="field-label">Stil</div><select class="field-input field-select" onchange="updateSectionButton('+comp.id+',\'style\',this.value)">'
@@ -513,7 +516,7 @@
             + '<option value="danger" '+(comp.button.style==='danger'?'selected':'')+'>Danger</option>'
             + '<option value="link" '+(comp.button.style==='link'?'selected':'')+'>Link</option>'
             + '</select></div>'
-            + '<div class="field-group"><div class="field-label">Custom ID / URL</div><input type="text" class="field-input" value="'+(comp.button.custom_id||comp.button.url||'')+'" oninput="updateSectionButton('+comp.id+',\'custom_id\',this.value)"></div>'
+            + '<div class="field-group"><div class="field-label">Custom ID / URL</div><input type="text" class="field-input" value="'+escAttr(comp.button.custom_id||comp.button.url||'')+'" oninput="updateSectionButton('+comp.id+',\'custom_id\',this.value)"></div>'
             + '</div>'
             + '<div style="text-align:right;margin-top:4px"><button type="button" onclick="removeSectionButton('+comp.id+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px">Butonu Kaldır</button></div>'
             + '</div>';
@@ -521,13 +524,13 @@
       } else if (comp.type === 'text') {
         html = '<div class="editor-title">📝 Text Ayarları</div>'
           + '<div class="field-group"><div class="field-label">İçerik (Markdown destekli)</div>'
-          + '<textarea class="field-input field-textarea" style="min-height:80px" oninput="updateCompField('+comp.id+',\'content\',this.value)">'+(comp.content||'')+'</textarea></div>'
+          + '<textarea id="editorField_content" class="field-input field-textarea" style="min-height:80px" oninput="updateCompField('+comp.id+',\'content\',this.value)">'+escHtml(comp.content||'')+'</textarea></div>'
           + '<div class="form-hint">**kalın**, *ital*, `kod`, ||spoiler||, [link](url)</div>';
       } else if (comp.type === 'media_gallery') {
         html = '<div class="editor-title">🖼 MediaGallery Ayarları</div>'
           + '<div class="field-group"><div class="field-label">Görseller (her satıra bir URL)</div>'
-          + '<textarea class="field-input field-textarea" style="min-height:80px" oninput="updateMediaGallery('+comp.id+',this.value)">'
-          + (comp.items||[]).map(i=>i.url).join('\n')+'</textarea></div>'
+          + '<textarea id="editorField_media" class="field-input field-textarea" style="min-height:80px" oninput="updateMediaGallery('+comp.id+',this.value)">'
+          + escHtml((comp.items||[]).map(i=>i.url).join('\n'))+'</textarea></div>'
           + '<div class="form-hint">Spoiler: URL sonuna <code>?spoiler=true</code> ekleyin</div>';
       } else if (comp.type === 'separator') {
         html = '<div class="editor-title">➖ Separator Ayarları</div>'
@@ -545,8 +548,8 @@
       } else if (comp.type === 'button') {
         html = '<div class="editor-title">🔘 Button Ayarları</div>'
           + '<div class="field-row">'
-          + '<div class="field-group"><div class="field-label">Etiket</div><input type="text" class="field-input" value="'+(comp.label||'')+'" oninput="updateCompField('+comp.id+',\'label\',this.value)"></div>'
-          + '<div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input" value="'+(comp.emoji||'')+'" oninput="updateCompField('+comp.id+',\'emoji\',this.value)" placeholder="👋"></div>'
+          + '<div class="field-group"><div class="field-label">Etiket</div><input type="text" class="field-input" value="'+escAttr(comp.label||'')+'" oninput="updateCompField('+comp.id+',\'label\',this.value)"></div>'
+          + '<div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input" value="'+escAttr(comp.emoji||'')+'" oninput="updateCompField('+comp.id+',\'emoji\',this.value)" placeholder="👋"></div>'
           + '</div>'
           + '<div class="field-row">'
           + '<div class="field-group"><div class="field-label">Stil</div><select class="field-input field-select" onchange="updateCompField('+comp.id+',\'style\',this.value)">'
@@ -556,7 +559,7 @@
           + '<option value="danger" '+(comp.style==='danger'?'selected':'')+'>Danger (Kırmızı)</option>'
           + '<option value="link" '+(comp.style==='link'?'selected':'')+'>Link (URL)</option>'
           + '</select></div>'
-          + '<div class="field-group"><div class="field-label">Custom ID / URL</div><input type="text" class="field-input" value="'+(comp.custom_id||comp.url||'')+'" oninput="updateCompField('+comp.id+',\'custom_id\',this.value)"></div>'
+          + '<div class="field-group"><div class="field-label">Custom ID / URL</div><input type="text" class="field-input" value="'+escAttr(comp.custom_id||comp.url||'')+'" oninput="updateCompField('+comp.id+',\'custom_id\',this.value)"></div>'
           + '</div>'
           + '<div class="field-row">'
           + '<div class="field-group"><div class="field-label">Yanıt Tipi</div><select class="field-input field-select" onchange="updateCompField('+comp.id+',\'action_type\',this.value)">'
@@ -564,10 +567,12 @@
           + '<option value="reply" '+(comp.action_type==='reply'?'selected':'')+'>Normal Yanıt</option>'
           + '<option value="embed_reply" '+(comp.action_type==='embed_reply'?'selected':'')+'>Embed Yanıt</option>'
           + '</select></div>'
-          + '<div class="field-group"><div class="field-label">Yanıt İçeriği</div><input type="text" class="field-input" value="'+(comp.action_content||'')+'" oninput="updateCompField('+comp.id+',\'action_content\',this.value)"></div>'
+          + '<div class="field-group"><div class="field-label">Yanıt İçeriği</div><input type="text" class="field-input" value="'+escAttr(comp.action_content||'')+'" oninput="updateCompField('+comp.id+',\'action_content\',this.value)"></div>'
           + '</div>';
       }
-      if (html) {
+      if (existing) {
+        existing.innerHTML = html;
+      } else if (html) {
         const div = document.createElement('div');
         div.id = 'componentEditor';
         div.className = 'editor-panel';
@@ -576,6 +581,9 @@
         if (selected) selected.parentNode.insertBefore(div, selected.nextSibling);
       }
     }
+
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     function toggleSectionButton(id) {
       const comp = findComponent(id);
@@ -597,9 +605,23 @@
       if (comp) { comp.button = null; renderComponents(); renderComponentEditor(); updatePreview(); }
     }
 
+    let _editing = false;
+
     function updateCompField(id, field, value) {
       const comp = findComponent(id);
-      if (comp) { comp[field] = value; updatePreview(); }
+      if (comp) { comp[field] = value; updatePreview(); updateListItemLabel(comp); }
+    }
+
+    function updateListItemLabel(comp) {
+      const item = document.querySelector('.component-item[data-id="'+comp.id+'"]');
+      if (!item) return;
+      const sub = item.querySelector('.comp-sub');
+      if (!sub) return;
+      if (comp.type === 'text') sub.textContent = (comp.content||'').substring(0,40) || 'Boş metin';
+      else if (comp.type === 'section') sub.textContent = (comp.text||'').substring(0,40) || 'Boş bölüm';
+      else if (comp.type === 'button') sub.textContent = (comp.label||'Buton') + ' · ' + comp.style;
+      else if (comp.type === 'media_gallery') sub.textContent = (comp.items||[]).length + ' görsel';
+      else if (comp.type === 'container') sub.textContent = (comp.components||[]).length + ' alt bileşen';
     }
 
     function updateMediaGallery(id, value) {
