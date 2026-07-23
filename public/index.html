@@ -25,11 +25,16 @@
   </div>
   <script>
     const params = new URLSearchParams(window.location.search);
-    if (params.get('error')) {
+    const error = params.get('error');
+    if (error) {
       const box = document.querySelector('.login-box');
       const alert = document.createElement('div');
       alert.className = 'alert alert-error';
-      alert.textContent = 'Giriş başarısız. Lütfen tekrar deneyin.';
+      if (error === 'not_allowed') {
+        alert.textContent = 'Bu hesaba panel erişimi yetkisi yok. Admin ile iletişime geçin.';
+      } else {
+        alert.textContent = 'Giriş başarısız. Lütfen tekrar deneyin.';
+      }
       box.insertBefore(alert, box.querySelector('.discord-btn'));
     }
   </script>

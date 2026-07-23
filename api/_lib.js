@@ -8,6 +8,8 @@ const client = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN || undefined,
 });
 
+const ADMIN_IDS = ['1336335753566748824'];
+
 async function initDB() {
   await client.batch([
     `CREATE TABLE IF NOT EXISTS users (
@@ -32,17 +34,18 @@ async function initDB() {
       id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL,
       user_id TEXT, user_name TEXT, details TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
+    `CREATE TABLE IF NOT EXISTS allowed_users (
+      id TEXT PRIMARY KEY, username TEXT DEFAULT '', added_by TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
   ]);
 
-  try {
-    await client.execute("ALTER TABLE commands ADD COLUMN buttons TEXT DEFAULT '[]'");
-  } catch(e) {}
-  try {
-    await client.execute("ALTER TABLE commands ADD COLUMN embed_footer TEXT DEFAULT ''");
-  } catch(e) {}
-  try {
-    await client.execute("ALTER TABLE commands ADD COLUMN components TEXT DEFAULT '[]'");
-  } catch(e) {}
+  try { await client.execute("ALTER TABLE commands ADD COLUMN buttons TEXT DEFAULT '[]'"); } catch(e) {}
+  try { await client.execute("ALTER TABLE commands ADD COLUMN embed_footer TEXT DEFAULT ''"); } catch(e) {}
+  try { await client.execute("ALTER TABLE commands ADD COLUMN components TEXT DEFAULT '[]'"); } catch(e) {}
+
+  for (const id of ADMIN_IDS) {
+    await client.execute({ sql: 'INSERT OR IGNORE INTO allowed_users (id, username, added_by) VALUES (?, ?, ?)', args: [id, 'Admin', 'system'] });
+  }
 
   const defaults = [
     ['bot_status', 'online'], ['bot_activity', 'SkyBlue Panel'],
@@ -59,7 +62,13 @@ let dbReady = false;
 async function ensureDB() { if (!dbReady) { await initDB(); dbReady = true; } }
 
 function signToken(user) {
-  return jwt.sign({ id: user.id, username: user.username, avatar: user.avatar }, JWT_SECRET, { expiresIn: '7d' });
+  const isAdmin = ADMIN_IDS.includes(String(user.id));
+  return jwt.sign({ id: user.id, username: user.username, avatar: user.avatar, admin: isAdmin }, JWT_SECRET, { expiresIn: '7d' });
+}
+
+function isAdmin(req) {
+  const user = getUserFromReq(req);
+  return user && user.admin === true;
 }
 
 function getUserFromReq(req) {
@@ -95,6 +104,13 @@ const db = {
     const [t,e,u,l] = await Promise.all([client.execute('SELECT COUNT(*) as c FROM commands'),client.execute('SELECT COUNT(*) as c FROM commands WHERE enabled=1'),client.execute('SELECT COUNT(*) as c FROM users'),client.execute('SELECT COUNT(*) as c FROM logs')]);
     return { totalCommands: t.rows[0].c, enabledCommands: e.rows[0].c, totalUsers: u.rows[0].c, totalLogs: l.rows[0].c };
   },
+  async isAllowedUser(id) {
+    const r = await client.execute({ sql: 'SELECT id FROM allowed_users WHERE id=?', args: [id] });
+    return r.rows.length > 0;
+  },
+  async getAllowedUsers() { return (await client.execute('SELECT * FROM allowed_users ORDER BY created_at DESC')).rows; },
+  async addAllowedUser(id, username, addedBy) { await client.execute({ sql: 'INSERT OR IGNORE INTO allowed_users (id, username, added_by) VALUES (?, ?, ?)', args: [id, username, addedBy] }); },
+  async removeAllowedUser(id) { await client.execute({ sql: 'DELETE FROM allowed_users WHERE id=?', args: [id] }); },
 };
 
 module.exports = { ensureDB, signToken, getUserFromReq, db };

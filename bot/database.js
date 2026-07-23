@@ -49,6 +49,12 @@ async function initDB() {
       details TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
+    `CREATE TABLE IF NOT EXISTS allowed_users (
+      id TEXT PRIMARY KEY,
+      username TEXT DEFAULT '',
+      added_by TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
   ]);
 
   const defaults = [

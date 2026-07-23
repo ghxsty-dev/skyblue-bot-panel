@@ -25,6 +25,14 @@ module.exports = async function handler(req, res) {
     const userData = await userRes.json();
     if (!userData.id) return res.redirect('/?error=user_failed');
 
+    const { ensureDB, db } = require('../_lib');
+    await ensureDB();
+
+    const allowed = await db.isAllowedUser(userData.id);
+    if (!allowed) {
+      return res.redirect('/?error=not_allowed');
+    }
+
     const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
@@ -43,8 +51,6 @@ module.exports = async function handler(req, res) {
     res.setHeader('Set-Cookie', `sb_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*60*60}`);
 
     try {
-      const { ensureDB, db } = require('../_lib');
-      await ensureDB();
       await db.upsertUser(userData.id, userData.username, avatarUrl, userData.discriminator, tokenData.access_token, tokenData.refresh_token);
       await db.addLog('login', userData.id, userData.username, 'Panel girişi yapıldı');
     } catch (dbErr) {
