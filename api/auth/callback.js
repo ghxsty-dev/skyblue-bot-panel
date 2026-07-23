@@ -4,13 +4,14 @@ const { signToken, setAuthCookie } = require('../../lib/auth');
 let dbReady = false;
 
 module.exports = async function handler(req, res) {
-  if (!dbReady) { await initDB(); dbReady = true; }
-
-  const { code } = req.query;
-  if (!code) return res.redirect('/');
-
   try {
-    const fetch = (await import('node-fetch')).default;
+    if (!dbReady) {
+      await initDB();
+      dbReady = true;
+    }
+
+    const { code } = req.query;
+    if (!code) return res.redirect('/');
 
     const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
       method: 'POST',
@@ -21,11 +22,13 @@ module.exports = async function handler(req, res) {
         grant_type: 'authorization_code',
         code,
         redirect_uri: process.env.DISCORD_REDIRECT_URI,
-      }),
+      }).toString(),
     });
     const tokenData = await tokenRes.json();
 
-    if (tokenData.error) return res.redirect('/?error=token_failed');
+    if (tokenData.error) {
+      return res.redirect('/?error=token_failed');
+    }
 
     const userRes = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
@@ -57,7 +60,7 @@ module.exports = async function handler(req, res) {
 
     res.redirect('/dashboard');
   } catch (err) {
-    console.error('OAuth error:', err);
+    console.error('OAuth error:', err.message, err.stack);
     res.redirect('/?error=auth_failed');
   }
 };
