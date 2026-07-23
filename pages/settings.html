@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyBlue - Ayarlar</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><div class="sidebar-brand-icon">🌊</div><div><div class="sidebar-brand-text">SkyBlue</div><div class="sidebar-brand-version">Bot Panel v1.0</div></div></div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Ana Menü</div>
+          <a href="/dashboard" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+          <a href="/commands" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Komutlar</a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Yönetim</div>
+          <a href="/settings" class="sidebar-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Ayarlar</a>
+          <a href="/logs" class="sidebar-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Loglar</a>
+        </div>
+      </nav>
+      <div class="sidebar-user" id="sidebarUser"><div class="sidebar-user-avatar" id="userAvatar"></div><div class="sidebar-user-info"><div class="sidebar-user-name" id="userName">Yükleniyor...</div><div class="sidebar-user-id" id="userId"></div></div><a href="/api/auth/logout" class="sidebar-logout" title="Çıkış Yap"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></a></div>
+    </aside>
+    <main class="main-content">
+      <div class="page-header fade-in"><h1 class="page-title">Bot Ayarları</h1><p class="page-subtitle">Botun davranışlarını ve özelliklerini yapılandırın</p></div>
+      <form id="settingsForm" onsubmit="saveSettings(event)">
+        <div class="card fade-in" style="margin-bottom: 20px;">
+          <div class="card-header"><span class="card-title">🤖 Bot Durumu</span></div>
+          <div style="padding: 20px 24px;">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Bot Durumu</label>
+                <select id="s_bot_status" class="form-select">
+                  <option value="online">🟢 Çevrimiçi</option><option value="idle">🟡 Boşta</option><option value="dnd">🔴 Rahatsız Etmeyin</option><option value="invisible">⚫ Görünmez</option>
+                </select></div>
+              <div class="form-group"><label class="form-label">Aktivite Tipi</label>
+                <select id="s_bot_activity_type" class="form-select">
+                  <option value="playing">Oynuyor</option><option value="streaming">Yayında</option><option value="listening">Dinliyor</option><option value="watching">İzliyor</option><option value="competing">Yarışıyor</option>
+                </select></div>
+            </div>
+            <div class="form-group"><label class="form-label">Aktivite Metni</label><input type="text" id="s_bot_activity" class="form-input" placeholder="SkyBlue Panel"></div>
+          </div>
+        </div>
+        <div class="card fade-in" style="margin-bottom: 20px;">
+          <div class="card-header"><span class="card-title">👋 Karşılama & Vedalaşma</span></div>
+          <div style="padding: 20px 24px;">
+            <div class="form-group"><label class="form-label">Karşılama Mesajı</label><textarea id="s_welcome_message" class="form-textarea" placeholder="Sunucuya hoş geldin {user}!"></textarea><div class="form-hint">{user} = kullanıcı, {server} = sunucu adı</div></div>
+            <div class="form-group"><label class="form-label">Karşılama Kanalı (ID)</label><input type="text" id="s_welcome_channel" class="form-input" placeholder="Kanal ID"></div>
+            <div class="form-group"><label class="form-label">Vedalaşma Mesajı</label><textarea id="s_goodbye_message" class="form-textarea" placeholder="{user} sunucudan ayrıldı."></textarea></div>
+            <div class="form-group"><label class="form-label">Vedalaşma Kanalı (ID)</label><input type="text" id="s_goodbye_channel" class="form-input" placeholder="Kanal ID"></div>
+          </div>
+        </div>
+        <div class="card fade-in" style="margin-bottom: 20px;">
+          <div class="card-header"><span class="card-title">🛡️ Diğer Ayarlar</span></div>
+          <div style="padding: 20px 24px;">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Otomatik Rol (ID)</label><input type="text" id="s_auto_role" class="form-input" placeholder="Rol ID"></div>
+              <div class="form-group"><label class="form-label">Log Kanalı (ID)</label><input type="text" id="s_log_channel" class="form-input" placeholder="Kanal ID"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Bot Önek</label><input type="text" id="s_bot_prefix" class="form-input" placeholder="!" maxlength="5" style="max-width:120px;"></div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <a href="/dashboard" class="btn btn-secondary">İptal</a>
+          <button type="submit" class="btn btn-primary">💾 Kaydet</button>
+        </div>
+      </form>
+    </main>
+  </div>
+  <script>
+    const fields = ['bot_status','bot_activity','bot_activity_type','welcome_message','goodbye_message','welcome_channel','goodbye_channel','log_channel','auto_role','bot_prefix'];
+    async function init() {
+      try {
+        const uRes = await fetch('/api/panel/dashboard');
+        if (!uRes.ok) return window.location.href = '/';
+        const uData = await uRes.json();
+        document.getElementById('userName').textContent = uData.user.username;
+        document.getElementById('userId').textContent = 'ID: ' + uData.user.id;
+        document.getElementById('userAvatar').innerHTML = `<img src="${uData.user.avatar}" style="width:100%;height:100%;border-radius:50%;">`;
+        for (const f of fields) {
+          const el = document.getElementById('s_' + f);
+          if (el && uData.settings[f] !== undefined) el.value = uData.settings[f];
+        }
+      } catch(e) { window.location.href = '/'; }
+    }
+    async function saveSettings(e) {
+      e.preventDefault();
+      const body = {};
+      for (const f of fields) {
+        const el = document.getElementById('s_' + f);
+        if (el) body[f] = el.value;
+      }
+      const res = await fetch('/api/panel/settings', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      if (res.ok) { alert('Ayarlar kaydedildi!'); }
+    }
+    init();
+  </script>
+</body>
+</html>
