@@ -3,6 +3,7 @@ const { ensureDB, signToken, db } = require('../_lib');
 module.exports = async function handler(req, res) {
   try {
     await ensureDB();
+
     const { code } = req.query;
     if (!code) return res.redirect('/');
 
@@ -24,6 +25,7 @@ module.exports = async function handler(req, res) {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
     const userData = await userRes.json();
+    if (!userData.id) return res.redirect('/?error=user_failed');
 
     const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
@@ -45,9 +47,9 @@ module.exports = async function handler(req, res) {
     await db.upsertUser(userData.id, userData.username, avatarUrl, userData.discriminator, tokenData.access_token, tokenData.refresh_token);
     await db.addLog('login', userData.id, userData.username, 'Panel girişi yapıldı');
 
-    res.redirect('/dashboard');
+    return res.redirect('/dashboard');
   } catch (err) {
     console.error('OAuth error:', err.message);
-    res.redirect('/?error=auth_failed');
+    return res.redirect('/?error=auth_failed');
   }
 };
