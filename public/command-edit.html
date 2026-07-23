@@ -27,7 +27,6 @@
     .add-component-btn:hover{border-color:var(--turkuaz);color:var(--turkuaz);background:var(--turkuaz-bg)}
     .discord-preview{width:100%;max-width:420px;background:#2b2d31;border-radius:8px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.3)}
     .preview-container{background:#2b2d31;border-left:4px solid var(--turkuaz);border-radius:4px;padding:12px;margin-bottom:8px}
-    .preview-container.accent{border-left-color:var(--turkuaz)}
     .preview-section{display:flex;gap:12px;align-items:flex-start;padding:4px 0}
     .preview-section-text{flex:1;color:#dbdee1;font-size:14px;line-height:1.4;white-space:pre-wrap}
     .preview-section-thumb{width:80px;height:80px;border-radius:50%;object-fit:cover;flex-shrink:0}
@@ -52,11 +51,6 @@
     .field-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
     .empty-state{text-align:center;padding:30px;color:var(--text-muted);font-size:13px}
     .empty-state-icon{font-size:28px;margin-bottom:8px;opacity:0.5}
-    .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:12px}
-    .tab-btn{padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:500;transition:var(--transition);font-family:inherit}
-    .tab-btn:hover{color:var(--text-primary)}
-    .tab-btn.active{color:var(--turkuaz);border-bottom-color:var(--turkuaz)}
-    .tab-content{display:none}.tab-content.active{display:block}
     @media(max-width:900px){.builder-layout{grid-template-columns:1fr}}
     .response-type-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
     .response-type-tab{padding:6px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:20px;color:var(--text-secondary);cursor:pointer;font-size:12px;font-weight:500;transition:var(--transition);font-family:inherit}
@@ -65,6 +59,16 @@
     .color-input{display:flex;align-items:center;gap:8px}
     .color-input input[type="color"]{width:36px;height:32px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:none;padding:2px}
     .color-input input[type="text"]{flex:1}
+    .editor-panel{background:var(--bg-secondary);border:1px solid var(--turkuaz);border-radius:var(--radius-sm);padding:12px;margin-top:8px}
+    .editor-title{font-size:11px;font-weight:600;color:var(--turkuaz);margin-bottom:8px;text-transform:uppercase}
+    .child-add-bar{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+    .child-add-btn{padding:3px 8px;background:var(--bg-input);border:1px solid var(--border);border-radius:3px;color:var(--text-muted);cursor:pointer;font-size:10px;font-weight:500;transition:var(--transition);font-family:inherit}
+    .child-add-btn:hover{border-color:var(--turkuaz);color:var(--turkuaz)}
+    .inline-btn-editor{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-top:6px}
+    .inline-btn-editor .field-label{font-size:10px}
+    .section-btn-toggle{display:flex;align-items:center;gap:8px;margin-top:6px;cursor:pointer;color:var(--text-muted);font-size:11px;font-weight:500;transition:var(--transition)}
+    .section-btn-toggle:hover{color:var(--turkuaz)}
+    .section-btn-toggle.active{color:var(--turkuaz)}
   </style>
 </head>
 <body>
@@ -116,9 +120,9 @@
           <div class="card-header"><span class="card-title">💬 Yanıt Tipi</span></div>
           <div style="padding: 20px 24px;">
             <div class="response-type-tabs">
-              <button type="button" class="response-type-tab active" onclick="setResponseType('text')">📝 Metin</button>
-              <button type="button" class="response-type-tab" onclick="setResponseType('embed')">💎 Embed</button>
-              <button type="button" class="response-type-tab" onclick="setResponseType('components')">📦 Components v2</button>
+              <button type="button" class="response-type-tab active" onclick="setResponseType('text',this)">📝 Metin</button>
+              <button type="button" class="response-type-tab" onclick="setResponseType('embed',this)">💎 Embed</button>
+              <button type="button" class="response-type-tab" onclick="setResponseType('components',this)">📦 Components v2</button>
             </div>
             <input type="hidden" id="cmdType" value="text">
             <div id="tabText" class="tab-content active">
@@ -138,11 +142,26 @@
                 <div class="builder-panel">
                   <div class="builder-panel-header">
                     <span>Bileşen Oluşturucu</span>
-                    <button type="button" class="add-component-btn" onclick="addRootComponent('container')" style="border-style:solid;background:var(--turkuaz-bg);border-color:var(--turkuaz);color:var(--turkuaz)">+ Container</button>
+                    <div style="display:flex;gap:4px">
+                      <button type="button" class="add-component-btn" onclick="addRootComponent('container')" style="border-style:solid;background:var(--turkuaz-bg);border-color:var(--turkuaz);color:var(--turkuaz)">+ Container</button>
+                      <button type="button" class="add-component-btn" onclick="addRootComponent('section')" style="border-style:solid;background:rgba(167,139,250,0.1);border-color:#a78bfa;color:#a78bfa">+ Section</button>
+                      <button type="button" class="add-component-btn" onclick="addRootComponent('text')" style="border-style:solid;background:rgba(251,191,36,0.1);border-color:#fbbf24;color:#fbbf24">+ Text</button>
+                    </div>
                   </div>
                   <div class="builder-panel-body">
                     <div id="componentList" class="component-list">
-                      <div class="empty-state"><div class="empty-state-icon">📦</div>Bileşen eklemek için yukarıdaki butonu kullanın<br><small>Container, Section, Text, MediaGallery, Separator</small></div>
+                      <div class="empty-state"><div class="empty-state-icon">📦</div>Bileşen eklemek için yukarıdaki butonları kullanın</div>
+                    </div>
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                      <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:6px">ALT BİLEŞEN EKLE</div>
+                      <div class="child-add-bar">
+                        <button type="button" class="child-add-btn" onclick="addChildToSelected('text')">📝 Text</button>
+                        <button type="button" class="child-add-btn" onclick="addChildToSelected('section')">📖 Section</button>
+                        <button type="button" class="child-add-btn" onclick="addChildToSelected('media_gallery')">🖼 Media</button>
+                        <button type="button" class="child-add-btn" onclick="addChildToSelected('separator')">➖ Separator</button>
+                        <button type="button" class="child-add-btn" onclick="addChildToSelected('button')">🔘 Button</button>
+                      </div>
+                      <div class="form-hint" style="margin-top:4px">Container seçiliyken alt bileşen ekleyin</div>
                     </div>
                   </div>
                 </div>
@@ -162,11 +181,11 @@
           </div>
         </div>
         <div class="card fade-in" style="margin-bottom: 20px;">
-          <div class="card-header"><span class="card-title">🔘 Butonlar (Metin/Embed için)</span></div>
+          <div class="card-header"><span class="card-title">🔘 Butonlar (Metin/Embed modu)</span></div>
           <div style="padding: 20px 24px;">
             <div id="buttonsList"></div>
             <button type="button" class="btn btn-secondary" onclick="addButton()" style="margin-top:8px">+ Buton Ekle</button>
-            <div class="form-hint" style="margin-top:8px">Components v2 modunda butonları Container içinde oluşturun.</div>
+            <div class="form-hint" style="margin-top:8px">Components v2 modunda butonları Container veya Section içine ekleyin.</div>
           </div>
         </div>
         <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -189,7 +208,7 @@
         const uData = await uRes.json();
         document.getElementById('userName').textContent = uData.user.username;
         document.getElementById('userId').textContent = 'ID: ' + uData.user.id;
-        document.getElementById('userAvatar').innerHTML = `<img src="${uData.user.avatar}" style="width:100%;height:100%;border-radius:50%;">`;
+        document.getElementById('userAvatar').innerHTML = '<img src="'+uData.user.avatar+'" style="width:100%;height:100%;border-radius:50%;">';
       } catch(e) { window.location.href = '/'; }
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
@@ -214,26 +233,36 @@
           document.getElementById('cmdEmbedDesc').value = c.embed_description || '';
           document.getElementById('cmdEmbedImage').value = c.embed_image || '';
           document.getElementById('cmdEmbedFooter').value = c.embed_footer || '';
-          try { components = JSON.parse(c.components || '[]'); } catch(e) { components = []; }
-          try {
-            const btns = JSON.parse(c.buttons || '[]');
-            btns.forEach(b => addButton(b));
-          } catch(e) {}
+          try { components = JSON.parse(c.components || '[]'); assignIds(components); } catch(e) { components = []; }
+          try { JSON.parse(c.buttons || '[]').forEach(b => addButton(b)); } catch(e) {}
           const rt = c.response_type || 'text';
-          setResponseType(rt);
+          document.querySelectorAll('.response-type-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          document.getElementById('cmdType').value = rt;
+          document.querySelectorAll('.response-type-tab').forEach(t => {
+            if ((rt==='text' && t.textContent.includes('Metin')) || (rt==='embed' && t.textContent.includes('Embed')) || (rt==='components' && t.textContent.includes('Components'))) t.classList.add('active');
+          });
+          document.getElementById('tab'+rt.charAt(0).toUpperCase()+rt.slice(1)).classList.add('active');
           renderComponents();
+          updatePreview();
         }
       }
     }
 
-    function setResponseType(type) {
+    function assignIds(list) {
+      for (const c of list) {
+        c.id = ++componentIdCounter;
+        if (c.components) assignIds(c.components);
+      }
+    }
+
+    function setResponseType(type, btn) {
       document.getElementById('cmdType').value = type;
       document.querySelectorAll('.response-type-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
-      if (type === 'text') document.getElementById('tabText').classList.add('active');
-      else if (type === 'embed') document.getElementById('tabEmbed').classList.add('active');
-      else if (type === 'components') document.getElementById('tabComponents').classList.add('active');
+      btn.classList.add('active');
+      const id = 'tab' + type.charAt(0).toUpperCase() + type.slice(1);
+      document.getElementById(id).classList.add('active');
     }
 
     document.getElementById('cmdEmbedColor').addEventListener('input', function() {
@@ -245,45 +274,43 @@
 
     function addButton(data) {
       const idx = document.querySelectorAll('.button-entry').length;
-      const html = `<div class="button-entry" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;background:var(--bg-secondary)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:12px;font-weight:600;color:var(--turkuaz)">Buton ${idx+1}</span>
-          <button type="button" class="component-actions danger" onclick="this.closest('.button-entry').remove()" style="color:var(--danger);background:none;border:none;cursor:pointer;font-size:12px">✕ Sil</button>
-        </div>
-        <div class="field-row">
-          <div class="field-group"><div class="field-label">Etiket</div><input type="text" class="field-input btn-label" value="${data?.label||''}" placeholder="Buton yazısı"></div>
-          <div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input btn-emoji" value="${data?.emoji||''}" placeholder="👋 veya :emoji:"></div>
-        </div>
-        <div class="field-row">
-          <div class="field-group"><div class="field-label">Stil</div><select class="field-input field-select btn-style">
-            <option value="primary" ${data?.style==='primary'?'selected':''}>Primary (Mavi)</option>
-            <option value="secondary" ${data?.style==='secondary'?'selected':''}>Secondary (Gri)</option>
-            <option value="success" ${data?.style==='success'?'selected':''}>Success (Yeşil)</option>
-            <option value="danger" ${data?.style==='danger'?'selected':''}>Danger (Kırmızı)</option>
-            <option value="link" ${data?.style==='link'?'selected':''}>Link (URL)</option>
-          </select></div>
-          <div class="field-group"><div class="field-label">URL (Link stili için)</div><input type="url" class="field-input btn-url" value="${data?.url||''}" placeholder="https://..."></div>
-        </div>
-        <div class="field-row">
-          <div class="field-group"><div class="field-label">Yanıt Tipi</div><select class="field-input field-select btn-action-type">
-            <option value="ephemeral" ${data?.action_type==='ephemeral'?'selected':''}>Ephemeral Mesaj</option>
-            <option value="reply" ${data?.action_type==='reply'?'selected':''}>Normal Yanıt</option>
-            <option value="embed_reply" ${data?.action_type==='embed_reply'?'selected':''}>Embed Yanıt</option>
-          </select></div>
-          <div class="field-group"><div class="field-label">Yanıt İçeriği</div><input type="text" class="field-input btn-action-content" value="${data?.action_content||''}" placeholder="Buton tıklandığında..."></div>
-        </div>
-      </div>`;
+      const html = '<div class="button-entry" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;background:var(--bg-secondary)">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+        + '<span style="font-size:12px;font-weight:600;color:var(--turkuaz)">Buton '+(idx+1)+'</span>'
+        + '<button type="button" onclick="this.closest(\'.button-entry\').remove()" style="color:var(--danger);background:none;border:none;cursor:pointer;font-size:12px">✕ Sil</button>'
+        + '</div>'
+        + '<div class="field-row">'
+        + '<div class="field-group"><div class="field-label">Etiket</div><input type="text" class="field-input btn-label" value="'+(data?.label||'')+'" placeholder="Buton yazısı"></div>'
+        + '<div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input btn-emoji" value="'+(data?.emoji||'')+'" placeholder="👋 veya :emoji:"></div>'
+        + '</div>'
+        + '<div class="field-row">'
+        + '<div class="field-group"><div class="field-label">Stil</div><select class="field-input field-select btn-style">'
+        + '<option value="primary" '+(data?.style==='primary'?'selected':'')+'>Primary (Mavi)</option>'
+        + '<option value="secondary" '+(data?.style==='secondary'?'selected':'')+'>Secondary (Gri)</option>'
+        + '<option value="success" '+(data?.style==='success'?'selected':'')+'>Success (Yeşil)</option>'
+        + '<option value="danger" '+(data?.style==='danger'?'selected':'')+'>Danger (Kırmızı)</option>'
+        + '<option value="link" '+(data?.style==='link'?'selected':'')+'>Link (URL)</option>'
+        + '</select></div>'
+        + '<div class="field-group"><div class="field-label">URL (Link stili için)</div><input type="url" class="field-input btn-url" value="'+(data?.url||'')+'" placeholder="https://..."></div>'
+        + '</div>'
+        + '<div class="field-row">'
+        + '<div class="field-group"><div class="field-label">Yanıt Tipi</div><select class="field-input field-select btn-action-type">'
+        + '<option value="ephemeral" '+(data?.action_type==='ephemeral'?'selected':'')+'>Ephemeral Mesaj</option>'
+        + '<option value="reply" '+(data?.action_type==='reply'?'selected':'')+'>Normal Yanıt</option>'
+        + '<option value="embed_reply" '+(data?.action_type==='embed_reply'?'selected':'')+'>Embed Yanıt</option>'
+        + '</select></div>'
+        + '<div class="field-group"><div class="field-label">Yanıt İçeriği</div><input type="text" class="field-input btn-action-content" value="'+(data?.action_content||'')+'" placeholder="Buton tıklandığında..."></div>'
+        + '</div></div>';
       document.getElementById('buttonsList').insertAdjacentHTML('beforeend', html);
     }
 
     function getButtons() {
       const btns = [];
       document.querySelectorAll('.button-entry').forEach(el => {
-        const style = el.querySelector('.btn-style').value;
         btns.push({
           label: el.querySelector('.btn-label').value,
           emoji: el.querySelector('.btn-emoji').value,
-          style,
+          style: el.querySelector('.btn-style').value,
           url: el.querySelector('.btn-url').value,
           action_type: el.querySelector('.btn-action-type').value,
           action_content: el.querySelector('.btn-action-content').value,
@@ -297,8 +324,6 @@
       const comp = { id, type };
       if (type === 'container') {
         comp.color = '#06b6d4';
-        comp.accent_color = null;
-        comp.spoiler = false;
         comp.components = [];
       } else if (type === 'section') {
         comp.text = 'Bölüm metni buraya';
@@ -313,29 +338,36 @@
         comp.divider = true;
       }
       components.push(comp);
+      selectedComponentId = id;
       renderComponents();
+      renderComponentEditor();
       updatePreview();
     }
 
-    function addChildComponent(parentId, type) {
+    function addChildToSelected(type) {
+      let parentId = selectedComponentId;
+      if (!parentId) {
+        if (components.length === 1 && components[0].type === 'container') {
+          parentId = components[0].id;
+        } else {
+          alert('Önce bir Container seçin!');
+          return;
+        }
+      }
       const parent = findComponent(parentId);
-      if (!parent || !parent.components) return;
+      if (!parent) { alert('Seçili bileşen bulunamadı!'); return; }
+      if (!parent.components) parent.components = [];
       const id = ++componentIdCounter;
       const comp = { id, type };
-      if (type === 'section') {
-        comp.text = 'Bölüm metni buraya';
-        comp.thumbnail = '';
-        comp.button = null;
-      } else if (type === 'text') {
-        comp.content = 'Metin içeriği buraya';
-      } else if (type === 'media_gallery') {
-        comp.items = [];
-      } else if (type === 'separator') {
-        comp.spacing = 'default';
-        comp.divider = true;
-      }
+      if (type === 'text') { comp.content = 'Metin içeriği buraya'; }
+      else if (type === 'section') { comp.text = 'Bölüm metni'; comp.thumbnail = ''; comp.button = null; }
+      else if (type === 'media_gallery') { comp.items = []; }
+      else if (type === 'separator') { comp.spacing = 'default'; comp.divider = true; }
+      else if (type === 'button') { comp.label = 'Buton'; comp.emoji = ''; comp.style = 'primary'; comp.url = ''; comp.action_type = 'ephemeral'; comp.action_content = 'Butona basıldı!'; }
       parent.components.push(comp);
+      selectedComponentId = id;
       renderComponents();
+      renderComponentEditor();
       updatePreview();
     }
 
@@ -351,22 +383,51 @@
       return null;
     }
 
+    function findParentComponent(id, list) {
+      list = list || components;
+      for (const c of list) {
+        if (c.components) {
+          for (const ch of c.components) {
+            if (ch.id === id) return c;
+          }
+          const found = findParentComponent(id, c.components);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
     function removeComponent(id) {
-      components = components.filter(c => c.id !== id);
-      components.forEach(c => {
-        if (c.components) c.components = c.components.filter(ch => ch.id !== id);
-      });
+      function removeFromList(list) {
+        return list.filter(c => {
+          if (c.id === id) return false;
+          if (c.components) c.components = removeFromList(c.components);
+          return true;
+        });
+      }
+      components = removeFromList(components);
       if (selectedComponentId === id) selectedComponentId = null;
       renderComponents();
+      removeEditor();
       updatePreview();
     }
 
     function moveComponent(id, dir) {
-      const idx = components.findIndex(c => c.id === id);
-      if (idx < 0) return;
-      const newIdx = idx + dir;
-      if (newIdx < 0 || newIdx >= components.length) return;
-      [components[idx], components[newIdx]] = [components[newIdx], components[idx]];
+      function moveInList(list) {
+        const idx = list.findIndex(c => c.id === id);
+        if (idx >= 0) {
+          const newIdx = idx + dir;
+          if (newIdx >= 0 && newIdx < list.length) {
+            [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
+          }
+          return true;
+        }
+        for (const c of list) {
+          if (c.components && moveInList(c.components)) return true;
+        }
+        return false;
+      }
+      moveInList(components);
       renderComponents();
       updatePreview();
     }
@@ -377,76 +438,163 @@
       renderComponentEditor();
     }
 
+    function removeEditor() {
+      const existing = document.getElementById('componentEditor');
+      if (existing) existing.remove();
+    }
+
     function renderComponents() {
       const list = document.getElementById('componentList');
       if (!components.length) {
-        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div>Bileşen eklemek için yukarıdaki butonu kullanın<br><small>Container, Section, Text, MediaGallery, Separator</small></div>';
+        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div>Bileşen eklemek için yukarıdaki butonları kullanın</div>';
         return;
       }
       list.innerHTML = components.map(c => renderComponentItem(c)).join('');
     }
 
     function renderComponentItem(comp) {
-      const typeLabels = { container: '📦 Container', section: '📖 Section', text: '📝 Text', media_gallery: '🖼 MediaGallery', separator: '➖ Separator' };
-      const typeColors = { container: 'var(--turkuaz)', section: '#a78bfa', text: '#fbbf24', media_gallery: '#f472b6', separator: '#6b7280' };
-      const selected = selectedComponentId === comp.id ? ' selected' : '';
-      let html = `<div class="component-item${selected}" onclick="selectComponent(${comp.id})">
-        <div class="component-header">
-          <span class="component-type" style="color:${typeColors[comp.type]}">${typeLabels[comp.type]}</span>
-          <div class="component-actions">
-            ${comp.type === 'container' ? `<button onclick="event.stopPropagation();addChildComponent(${comp.id},'section')" title="Section Ekle">+S</button>
-            <button onclick="event.stopPropagation();addChildComponent(${comp.id},'text')" title="Text Ekle">+T</button>
-            <button onclick="event.stopPropagation();addChildComponent(${comp.id},'media_gallery')" title="MediaGallery Ekle">+M</button>
-            <button onclick="event.stopPropagation();addChildComponent(${comp.id},'separator')" title="Separator Ekle">+-</button>` : ''}
-            <button onclick="event.stopPropagation();moveComponent(${comp.id},-1)" title="Yukarı">↑</button>
-            <button onclick="event.stopPropagation();moveComponent(${comp.id},1)" title="Aşağı">↓</button>
-            <button class="danger" onclick="event.stopPropagation();removeComponent(${comp.id})" title="Sil">✕</button>
-          </div>
-        </div>`;
+      const typeLabels = { container:'📦 Container', section:'📖 Section', text:'📝 Text', media_gallery:'🖼 MediaGallery', separator:'➖ Separator', button:'🔘 Button' };
+      const typeColors = { container:'var(--turkuaz)', section:'#a78bfa', text:'#fbbf24', media_gallery:'#f472b6', separator:'#6b7280', button:'#10b981' };
+      const sel = selectedComponentId === comp.id ? ' selected' : '';
+      let html = '<div class="component-item'+sel+'" onclick="selectComponent('+comp.id+')">'
+        + '<div class="component-header">'
+        + '<span class="component-type" style="color:'+typeColors[comp.type]+'">'+typeLabels[comp.type]+'</span>'
+        + '<div class="component-actions">'
+        + '<button onclick="event.stopPropagation();moveComponent('+comp.id+',-1)" title="Yukarı">↑</button>'
+        + '<button onclick="event.stopPropagation();moveComponent('+comp.id+',1)" title="Aşağı">↓</button>'
+        + '<button class="danger" onclick="event.stopPropagation();removeComponent('+comp.id+')" title="Sil">✕</button>'
+        + '</div></div>';
+      if (comp.type === 'button') {
+        html += '<div style="font-size:11px;color:var(--text-muted)">'
+          + (comp.label||'') + ' '
+          + '<span style="background:var(--bg-input);padding:1px 4px;border-radius:3px;font-size:10px">'+comp.style+'</span>'
+          + '</div>';
+      }
       if (comp.type === 'container' && comp.components && comp.components.length) {
-        html += `<div class="component-child-list">${comp.components.map(ch => renderComponentItem(ch)).join('')}</div>`;
+        html += '<div class="component-child-list">' + comp.components.map(ch => renderComponentItem(ch)).join('') + '</div>';
       }
       html += '</div>';
       return html;
     }
 
     function renderComponentEditor() {
+      removeEditor();
       const comp = findComponent(selectedComponentId);
       if (!comp) return;
-      let editorHtml = '';
+      let html = '';
       if (comp.type === 'container') {
-        editorHtml = `<div class="field-group"><div class="field-label">Accent Renk</div><div class="color-input"><input type="color" value="${comp.color||'#06b6d4'}" onchange="updateCompField(${comp.id},'color',this.value)"><input type="text" class="field-input" value="${comp.color||'#06b6d4'}" onchange="updateCompField(${comp.id},'color',this.value)"></div></div>`;
+        html = '<div class="editor-title">📦 Container Ayarları</div>'
+          + '<div class="field-group"><div class="field-label">Accent Renk</div>'
+          + '<div class="color-input"><input type="color" value="'+(comp.color||'#06b6d4')+'" oninput="updateCompField('+comp.id+',\'color\',this.value)">'
+          + '<input type="text" class="field-input" value="'+(comp.color||'#06b6d4')+'" onchange="updateCompField('+comp.id+',\'color\',this.value)"></div></div>'
+          + '<div class="field-group"><div class="field-label">Spoiler</div><select class="field-input field-select" onchange="updateCompField('+comp.id+',\'spoiler\',this.value===\'true\')">'
+          + '<option value="false" '+(comp.spoiler?'':'selected')+'>Hayır</option><option value="true" '+(comp.spoiler?'selected':'')+'>Evet</option></select></div>'
+          + '<div class="form-hint">Container içine alt bileşen eklemek için sol panelden "ALT BİLEŞEN EKLE" bölümünü kullanın</div>';
       } else if (comp.type === 'section') {
-        editorHtml = `<div class="field-group"><div class="field-label">Metin</div><textarea class="field-input field-textarea" onchange="updateCompField(${comp.id},'text',this.value)">${comp.text||''}</textarea></div>
-        <div class="field-group"><div class="field-label">Thumbnail URL</div><input type="url" class="field-input" value="${comp.thumbnail||''}" onchange="updateCompField(${comp.id},'thumbnail',this.value)" placeholder="https://..."></div>`;
+        html = '<div class="editor-title">📖 Section Ayarları</div>'
+          + '<div class="field-group"><div class="field-label">Metin</div>'
+          + '<textarea class="field-input field-textarea" oninput="updateCompField('+comp.id+',\'text\',this.value)">'+(comp.text||'')+'</textarea></div>'
+          + '<div class="field-group"><div class="field-label">Thumbnail URL</div>'
+          + '<input type="url" class="field-input" value="'+(comp.thumbnail||'')+'" onchange="updateCompField('+comp.id+',\'thumbnail\',this.value)" placeholder="https://..."></div>'
+          + '<div class="section-btn-toggle '+(comp.button?'active':'')+'" onclick="toggleSectionButton('+comp.id+')">'
+          + (comp.button ? '🔘 Buton Aktif — Düzenlemek için tıklayın' : '+ Section\'a Buton Ekle')
+          + '</div>';
+        if (comp.button) {
+          html += '<div class="inline-btn-editor">'
+            + '<div class="field-row">'
+            + '<div class="field-group"><div class="field-label">Buton Etiket</div><input type="text" class="field-input" value="'+(comp.button.label||'')+'" oninput="updateSectionButton('+comp.id+',\'label\',this.value)"></div>'
+            + '<div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input" value="'+(comp.button.emoji||'')+'" oninput="updateSectionButton('+comp.id+',\'emoji\',this.value)" placeholder="👋"></div>'
+            + '</div>'
+            + '<div class="field-row">'
+            + '<div class="field-group"><div class="field-label">Stil</div><select class="field-input field-select" onchange="updateSectionButton('+comp.id+',\'style\',this.value)">'
+            + '<option value="primary" '+(comp.button.style==='primary'?'selected':'')+'>Primary</option>'
+            + '<option value="secondary" '+(comp.button.style==='secondary'?'selected':'')+'>Secondary</option>'
+            + '<option value="success" '+(comp.button.style==='success'?'selected':'')+'>Success</option>'
+            + '<option value="danger" '+(comp.button.style==='danger'?'selected':'')+'>Danger</option>'
+            + '<option value="link" '+(comp.button.style==='link'?'selected':'')+'>Link</option>'
+            + '</select></div>'
+            + '<div class="field-group"><div class="field-label">Custom ID / URL</div><input type="text" class="field-input" value="'+(comp.button.custom_id||comp.button.url||'')+'" oninput="updateSectionButton('+comp.id+',\'custom_id\',this.value)"></div>'
+            + '</div>'
+            + '<div style="text-align:right;margin-top:4px"><button type="button" onclick="removeSectionButton('+comp.id+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px">Butonu Kaldır</button></div>'
+            + '</div>';
+        }
       } else if (comp.type === 'text') {
-        editorHtml = `<div class="field-group"><div class="field-label">İçerik</div><textarea class="field-input field-textarea" onchange="updateCompField(${comp.id},'content',this.value)">${comp.content||''}</textarea></div>`;
+        html = '<div class="editor-title">📝 Text Ayarları</div>'
+          + '<div class="field-group"><div class="field-label">İçerik (Markdown destekli)</div>'
+          + '<textarea class="field-input field-textarea" style="min-height:80px" oninput="updateCompField('+comp.id+',\'content\',this.value)">'+(comp.content||'')+'</textarea></div>'
+          + '<div class="form-hint">**kalın**, *ital*, `kod`, ||spoiler||, [link](url)</div>';
       } else if (comp.type === 'media_gallery') {
-        editorHtml = `<div class="field-group"><div class="field-label">Görseller (URL satır satır)</div><textarea class="field-input field-textarea" onchange="updateMediaGallery(${comp.id},this.value)">${(comp.items||[]).map(i=>i.url).join('\n')}</textarea><div class="form-hint">Her satıra bir görsel URL'si yazın</div></div>`;
+        html = '<div class="editor-title">🖼 MediaGallery Ayarları</div>'
+          + '<div class="field-group"><div class="field-label">Görseller (her satıra bir URL)</div>'
+          + '<textarea class="field-input field-textarea" style="min-height:80px" oninput="updateMediaGallery('+comp.id+',this.value)">'
+          + (comp.items||[]).map(i=>i.url).join('\n')+'</textarea></div>'
+          + '<div class="form-hint">Spoiler: URL sonuna <code>?spoiler=true</code> ekleyin</div>';
       } else if (comp.type === 'separator') {
-        editorHtml = `<div class="field-row">
-          <div class="field-group"><div class="field-label">Boşluk</div><select class="field-input field-select" onchange="updateCompField(${comp.id},'spacing',this.value)">
-            <option value="small" ${comp.spacing==='small'?'selected':''}>Küçük</option>
-            <option value="default" ${comp.spacing==='default'?'selected':''}>Normal</option>
-            <option value="large" ${comp.spacing==='large'?'selected':''}>Büyük</option>
-            <option value="extra_large" ${comp.spacing==='extra_large'?'selected':''}>Çok Büyük</option>
-          </select></div>
-          <div class="field-group"><div class="field-label">Ayırıcı Çizgi</div><select class="field-input field-select" onchange="updateCompField(${comp.id},'divider',this.value==='true')">
-            <option value="true" ${comp.divider!==false?'selected':''}>Göster</option>
-            <option value="false" ${comp.divider===false?'selected':''}>Gizle</option>
-          </select></div>
-        </div>`;
+        html = '<div class="editor-title">➖ Separator Ayarları</div>'
+          + '<div class="field-row">'
+          + '<div class="field-group"><div class="field-label">Boşluk</div><select class="field-input field-select" onchange="updateCompField('+comp.id+',\'spacing\',this.value)">'
+          + '<option value="small" '+(comp.spacing==='small'?'selected':'')+'>Küçük</option>'
+          + '<option value="default" '+(comp.spacing==='default'?'selected':'')+'>Normal</option>'
+          + '<option value="large" '+(comp.spacing==='large'?'selected':'')+'>Büyük</option>'
+          + '<option value="extra_large" '+(comp.spacing==='extra_large'?'selected':'')+'>Çok Büyük</option>'
+          + '</select></div>'
+          + '<div class="field-group"><div class="field-label">Çizgi</div><select class="field-input field-select" onchange="updateCompField('+comp.id+',\'divider\',this.value===\'true\')">'
+          + '<option value="true" '+(comp.divider!==false?'selected':'')+'>Göster</option>'
+          + '<option value="false" '+(comp.divider===false?'selected':'')+'>Gizle</option>'
+          + '</select></div></div>';
+      } else if (comp.type === 'button') {
+        html = '<div class="editor-title">🔘 Button Ayarları</div>'
+          + '<div class="field-row">'
+          + '<div class="field-group"><div class="field-label">Etiket</div><input type="text" class="field-input" value="'+(comp.label||'')+'" oninput="updateCompField('+comp.id+',\'label\',this.value)"></div>'
+          + '<div class="field-group"><div class="field-label">Emoji</div><input type="text" class="field-input" value="'+(comp.emoji||'')+'" oninput="updateCompField('+comp.id+',\'emoji\',this.value)" placeholder="👋"></div>'
+          + '</div>'
+          + '<div class="field-row">'
+          + '<div class="field-group"><div class="field-label">Stil</div><select class="field-input field-select" onchange="updateCompField('+comp.id+',\'style\',this.value)">'
+          + '<option value="primary" '+(comp.style==='primary'?'selected':'')+'>Primary (Mavi)</option>'
+          + '<option value="secondary" '+(comp.style==='secondary'?'selected':'')+'>Secondary (Gri)</option>'
+          + '<option value="success" '+(comp.style==='success'?'selected':'')+'>Success (Yeşil)</option>'
+          + '<option value="danger" '+(comp.style==='danger'?'selected':'')+'>Danger (Kırmızı)</option>'
+          + '<option value="link" '+(comp.style==='link'?'selected':'')+'>Link (URL)</option>'
+          + '</select></div>'
+          + '<div class="field-group"><div class="field-label">Custom ID / URL</div><input type="text" class="field-input" value="'+(comp.custom_id||comp.url||'')+'" oninput="updateCompField('+comp.id+',\'custom_id\',this.value)"></div>'
+          + '</div>'
+          + '<div class="field-row">'
+          + '<div class="field-group"><div class="field-label">Yanıt Tipi</div><select class="field-input field-select" onchange="updateCompField('+comp.id+',\'action_type\',this.value)">'
+          + '<option value="ephemeral" '+(comp.action_type==='ephemeral'?'selected':'')+'>Ephemeral</option>'
+          + '<option value="reply" '+(comp.action_type==='reply'?'selected':'')+'>Normal Yanıt</option>'
+          + '<option value="embed_reply" '+(comp.action_type==='embed_reply'?'selected':'')+'>Embed Yanıt</option>'
+          + '</select></div>'
+          + '<div class="field-group"><div class="field-label">Yanıt İçeriği</div><input type="text" class="field-input" value="'+(comp.action_content||'')+'" oninput="updateCompField('+comp.id+',\'action_content\',this.value)"></div>'
+          + '</div>';
       }
-      const existing = document.getElementById('componentEditor');
-      if (existing) existing.remove();
-      if (editorHtml) {
+      if (html) {
         const div = document.createElement('div');
         div.id = 'componentEditor';
-        div.style.cssText = 'background:var(--bg-secondary);border:1px solid var(--turkuaz);border-radius:var(--radius-sm);padding:12px;margin-top:8px';
-        div.innerHTML = `<div style="font-size:11px;font-weight:600;color:var(--turkuaz);margin-bottom:8px;text-transform:uppercase">Düzenle: ${comp.type}</div>${editorHtml}`;
-        const compItem = document.querySelector(`.component-item.selected`);
-        if (compItem) compItem.insertAdjacentElement('afterend', div);
+        div.className = 'editor-panel';
+        div.innerHTML = html;
+        const selected = document.querySelector('.component-item.selected');
+        if (selected) selected.parentNode.insertBefore(div, selected.nextSibling);
       }
+    }
+
+    function toggleSectionButton(id) {
+      const comp = findComponent(id);
+      if (!comp) return;
+      if (comp.button) { comp.button = null; }
+      else { comp.button = { label: 'Buton', emoji: '', style: 'primary', custom_id: 'section_btn', action_type: 'ephemeral', action_content: 'Butona basıldı!' }; }
+      renderComponents();
+      renderComponentEditor();
+      updatePreview();
+    }
+
+    function updateSectionButton(id, field, value) {
+      const comp = findComponent(id);
+      if (comp && comp.button) { comp.button[field] = value; updatePreview(); }
+    }
+
+    function removeSectionButton(id) {
+      const comp = findComponent(id);
+      if (comp) { comp.button = null; renderComponents(); renderComponentEditor(); updatePreview(); }
     }
 
     function updateCompField(id, field, value) {
@@ -475,23 +623,30 @@
       switch(comp.type) {
         case 'container': {
           const children = (comp.components||[]).map(ch => renderPreviewComponent(ch)).join('');
-          return `<div class="preview-container" style="border-left-color:${comp.color||'#06b6d4'}">${children}</div>`;
+          return '<div class="preview-container" style="border-left-color:'+(comp.color||'#06b6d4')+'">'+children+'</div>';
         }
         case 'section': {
-          const thumb = comp.thumbnail ? `<img src="${comp.thumbnail}" class="preview-section-thumb">` : '';
-          const btn = comp.button ? `<div style="margin-top:4px"><button class="preview-btn primary">${comp.button.label||'Button'}</button></div>` : '';
-          return `<div class="preview-section"><div class="preview-section-text">${comp.text||''}${btn}</div>${thumb}</div>`;
+          const thumb = comp.thumbnail ? '<img src="'+comp.thumbnail+'" class="preview-section-thumb" onerror="this.style.display=\'none\'">' : '';
+          let btnHtml = '';
+          if (comp.button) {
+            const styleMap = {primary:'primary',secondary:'secondary',success:'success',danger:'danger',link:'link'};
+            btnHtml = '<div style="margin-top:4px"><button class="preview-btn '+(styleMap[comp.button.style]||'primary')+'">'+(comp.button.emoji?comp.button.emoji+' ':'')+(comp.button.label||'Button')+'</button></div>';
+          }
+          return '<div class="preview-section"><div class="preview-section-text">'+(comp.text||'').replace(/\n/g,'<br>')+btnHtml+'</div>'+thumb+'</div>';
         }
         case 'text':
-          return `<div class="preview-text">${comp.content||''}</div>`;
+          return '<div class="preview-text">'+(comp.content||'').replace(/\n/g,'<br>')+'</div>';
         case 'media_gallery': {
-          const imgs = (comp.items||[]).map(i => `<img src="${i.url}">`).join('');
-          return `<div class="preview-media">${imgs}</div>`;
+          const imgs = (comp.items||[]).map(i => '<img src="'+i.url+'" onerror="this.style.display=\'none\'">').join('');
+          return '<div class="preview-media">'+imgs+'</div>';
         }
         case 'separator':
-          return `<hr class="preview-separator${comp.spacing==='small'||comp.spacing==='large'?' thin':''}">`;
-        default:
-          return '';
+          return '<hr class="preview-separator'+(comp.spacing==='small'||comp.spacing==='large'?' thin':'')+'">';
+        case 'button': {
+          const sm = {primary:'primary',secondary:'secondary',success:'success',danger:'danger',link:'link'};
+          return '<div class="preview-btns"><button class="preview-btn '+(sm[comp.style]||'primary')+'">'+(comp.emoji?comp.emoji+' ':'')+(comp.label||'Button')+'</button></div>';
+        }
+        default: return '';
       }
     }
 
@@ -508,7 +663,7 @@
         embed_image: document.getElementById('cmdEmbedImage').value,
         embed_footer: document.getElementById('cmdEmbedFooter').value,
         buttons: getButtons(),
-        components: components.map(c => { const copy = {...c}; delete copy.id; return copy; }),
+        components: components.map(c => { const copy = JSON.parse(JSON.stringify(c)); delete copy.id; return copy; }),
         enabled: document.getElementById('cmdEnabled').checked,
         cooldown: parseInt(document.getElementById('cmdCooldown').value) || 0,
         required_role: document.getElementById('cmdRole').value,
@@ -520,7 +675,7 @@
       if (res.ok) { window.location.href = '/commands'; }
       else {
         const err = await res.json();
-        document.getElementById('errorAlert').innerHTML = `<div class="alert alert-error">⚠️ ${err.error}</div>`;
+        document.getElementById('errorAlert').innerHTML = '<div class="alert alert-error">⚠️ '+err.error+'</div>';
       }
     }
     init();

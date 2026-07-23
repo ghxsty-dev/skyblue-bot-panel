@@ -122,7 +122,7 @@ function buildComponent(comp) {
         const btn = new ButtonBuilder().setStyle(styleMap[comp.button.style] || ButtonStyle.Primary);
         if (comp.button.label) btn.setLabel(comp.button.label);
         if (comp.button.emoji) btn.setEmoji(comp.button.emoji);
-        if (comp.button.style === 'link') btn.setURL(comp.button.url || 'https://placeholder.com');
+        if (comp.button.style === 'link') btn.setURL(comp.button.url || comp.button.custom_id || 'https://placeholder.com');
         else btn.setCustomId(comp.button.custom_id || 'section_btn');
         section.addButtonComponents(btn);
       }
@@ -148,10 +148,21 @@ function buildComponent(comp) {
       if (comp.divider === false) sep.setDivider(false);
       return sep;
     }
+    case 'button': {
+      const styleMap = { primary: ButtonStyle.Primary, secondary: ButtonStyle.Secondary, success: ButtonStyle.Success, danger: ButtonStyle.Danger, link: ButtonStyle.Link };
+      const btn = new ButtonBuilder().setStyle(styleMap[comp.style] || ButtonStyle.Primary);
+      if (comp.label) btn.setLabel(comp.label);
+      if (comp.emoji) btn.setEmoji(comp.emoji);
+      if (comp.style === 'link') btn.setURL(comp.url || comp.custom_id || 'https://placeholder.com');
+      else btn.setCustomId(comp.custom_id || 'btn_' + Math.random().toString(36).slice(2, 8));
+      const row = new ActionRowBuilder().addComponents(btn);
+      return row;
+    }
     case 'container': {
       const container = new ContainerBuilder();
       if (comp.color) container.setColor(comp.color);
       if (comp.accent_color) container.setAccentColor(comp.accent_color);
+      if (comp.spoiler) container.setSpoiler(true);
       if (comp.components) {
         for (const child of comp.components) {
           const builtChild = buildComponent(child);
