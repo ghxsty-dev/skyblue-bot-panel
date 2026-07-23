@@ -20,14 +20,14 @@ client.once('ready', async () => {
   console.log(`  ╚══════════════════════════════════════╝\n`);
 
   isReady = true;
-  updateBotStatus();
+  await updateBotStatus();
   await deployCommands();
 });
 
-function updateBotStatus() {
-  const status = db.getSetting('bot_status') || 'online';
-  const activity = db.getSetting('bot_activity') || 'SkyBlue Panel';
-  const activityType = db.getSetting('bot_activity_type') || 'playing';
+async function updateBotStatus() {
+  const status = (await db.getSetting('bot_status')) || 'online';
+  const activity = (await db.getSetting('bot_activity')) || 'SkyBlue Panel';
+  const activityType = (await db.getSetting('bot_activity_type')) || 'playing';
 
   const activityTypes = { playing: 0, streaming: 1, listening: 2, watching: 3, competing: 5 };
 
