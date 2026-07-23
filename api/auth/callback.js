@@ -1,9 +1,7 @@
-const { ensureDB, signToken, db } = require('../_lib');
+const { signToken } = require('../_lib');
 
 module.exports = async function handler(req, res) {
   try {
-    await ensureDB();
-
     const { code } = req.query;
     if (!code) return res.redirect('/');
 
@@ -44,8 +42,14 @@ module.exports = async function handler(req, res) {
     const token = signToken(userObj);
     res.setHeader('Set-Cookie', `sb_token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*60*60}`);
 
-    await db.upsertUser(userData.id, userData.username, avatarUrl, userData.discriminator, tokenData.access_token, tokenData.refresh_token);
-    await db.addLog('login', userData.id, userData.username, 'Panel girişi yapıldı');
+    try {
+      const { ensureDB, db } = require('../_lib');
+      await ensureDB();
+      await db.upsertUser(userData.id, userData.username, avatarUrl, userData.discriminator, tokenData.access_token, tokenData.refresh_token);
+      await db.addLog('login', userData.id, userData.username, 'Panel girişi yapıldı');
+    } catch (dbErr) {
+      console.error('DB error (non-blocking):', dbErr.message);
+    }
 
     return res.redirect('/dashboard');
   } catch (err) {
