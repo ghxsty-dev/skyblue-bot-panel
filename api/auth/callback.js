@@ -1,5 +1,5 @@
-const { db, initDB } = require('../lib/database');
-const { signToken, setAuthCookie } = require('../lib/auth');
+const { db, initDB } = require('../../lib/database');
+const { signToken, setAuthCookie } = require('../../lib/auth');
 
 let dbReady = false;
 
