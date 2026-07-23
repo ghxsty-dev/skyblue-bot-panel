@@ -1,10 +1,11 @@
 {
   "rewrites": [
-    { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/commands/new", "destination": "/command-edit.html" },
-    { "source": "/commands/edit", "destination": "/command-edit.html" },
-    { "source": "/commands", "destination": "/commands.html" },
-    { "source": "/settings", "destination": "/settings.html" },
-    { "source": "/logs", "destination": "/logs.html" }
+    { "source": "/", "destination": "/public/index.html" },
+    { "source": "/dashboard", "destination": "/public/dashboard.html" },
+    { "source": "/commands/new", "destination": "/public/command-edit.html" },
+    { "source": "/commands/edit", "destination": "/public/command-edit.html" },
+    { "source": "/commands", "destination": "/public/commands.html" },
+    { "source": "/settings", "destination": "/public/settings.html" },
+    { "source": "/logs", "destination": "/public/logs.html" }
   ]
 }
