@@ -5,7 +5,73 @@ const client = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
+async function initDB() {
+  await client.batch([
+    `CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT NOT NULL,
+      avatar TEXT,
+      discriminator TEXT,
+      access_token TEXT,
+      refresh_token TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS commands (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      description TEXT DEFAULT '',
+      response TEXT DEFAULT '',
+      response_type TEXT DEFAULT 'text',
+      embed_title TEXT DEFAULT '',
+      embed_description TEXT DEFAULT '',
+      embed_color TEXT DEFAULT '#06b6d4',
+      embed_image TEXT DEFAULT '',
+      enabled INTEGER DEFAULT 1,
+      cooldown INTEGER DEFAULT 0,
+      required_role TEXT DEFAULT '',
+      delete_command INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS bot_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT NOT NULL,
+      user_id TEXT,
+      user_name TEXT,
+      details TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+  ]);
+
+  const defaults = [
+    ['bot_status', 'online'],
+    ['bot_activity', 'SkyBlue Panel'],
+    ['bot_activity_type', 'playing'],
+    ['welcome_message', 'Sunucuya hoş geldin {user}!'],
+    ['goodbye_message', '{user} sunucudan ayrıldı.'],
+    ['welcome_channel', ''],
+    ['goodbye_channel', ''],
+    ['log_channel', ''],
+    ['auto_role', ''],
+    ['bot_prefix', '!'],
+  ];
+
+  for (const [key, value] of defaults) {
+    await client.execute({
+      sql: 'INSERT OR IGNORE INTO bot_settings (key, value) VALUES (?, ?)',
+      args: [key, value],
+    });
+  }
+}
+
 const db = {
+  initDB,
+
   async getAllCommands() {
     const result = await client.execute('SELECT * FROM commands WHERE enabled = 1 ORDER BY name ASC');
     return result.rows;

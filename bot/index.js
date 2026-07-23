@@ -149,6 +149,10 @@ setInterval(async () => {
   }
 }, 60000);
 
-client.login(process.env.DISCORD_BOT_TOKEN).catch(err => {
-  console.error('  ❌ Bot giriş hatası:', err.message);
-});
+(async () => {
+  await db.initDB();
+  console.log('  ✅ Veritabanı tabloları hazır.');
+  client.login(process.env.DISCORD_BOT_TOKEN).catch(err => {
+    console.error('  ❌ Bot giriş hatası:', err.message);
+  });
+})();
