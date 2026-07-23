@@ -25,6 +25,7 @@ module.exports = async function handler(req, res) {
       embed_description: req.body.embed_description || '', embed_color: req.body.embed_color || '#06b6d4',
       embed_image: req.body.embed_image || '', embed_footer: req.body.embed_footer || '',
       buttons: typeof req.body.buttons === 'string' ? req.body.buttons : JSON.stringify(req.body.buttons || []),
+      components: typeof req.body.components === 'string' ? req.body.components : JSON.stringify(req.body.components || []),
       enabled: req.body.enabled ? 1 : 0,
       cooldown: parseInt(req.body.cooldown) || 0, required_role: req.body.required_role || '',
       delete_command: req.body.delete_command ? 1 : 0,

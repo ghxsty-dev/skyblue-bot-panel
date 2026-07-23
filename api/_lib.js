@@ -20,6 +20,7 @@ async function initDB() {
       embed_title TEXT DEFAULT '', embed_description TEXT DEFAULT '', embed_color TEXT DEFAULT '#06b6d4',
       embed_image TEXT DEFAULT '', embed_footer TEXT DEFAULT '',
       buttons TEXT DEFAULT '[]',
+      components TEXT DEFAULT '[]',
       enabled INTEGER DEFAULT 1, cooldown INTEGER DEFAULT 0,
       required_role TEXT DEFAULT '', delete_command INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -38,6 +39,9 @@ async function initDB() {
   } catch(e) {}
   try {
     await client.execute("ALTER TABLE commands ADD COLUMN embed_footer TEXT DEFAULT ''");
+  } catch(e) {}
+  try {
+    await client.execute("ALTER TABLE commands ADD COLUMN components TEXT DEFAULT '[]'");
   } catch(e) {}
 
   const defaults = [
@@ -78,8 +82,8 @@ const db = {
   async getEnabledCommands() { return (await client.execute('SELECT * FROM commands WHERE enabled=1 ORDER BY name ASC')).rows; },
   async getCommand(id) { return (await client.execute({ sql: 'SELECT * FROM commands WHERE id=?', args: [id] })).rows[0] || null; },
   async getCommandByName(name) { return (await client.execute({ sql: 'SELECT * FROM commands WHERE name=?', args: [name] })).rows[0] || null; },
-  async createCommand(d) { return await client.execute({ sql: 'INSERT INTO commands (name,description,response,response_type,embed_title,embed_description,embed_color,embed_image,embed_footer,buttons,enabled,cooldown,required_role,delete_command) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', args: [d.name,d.description,d.response,d.response_type,d.embed_title,d.embed_description,d.embed_color,d.embed_image,d.embed_footer||'',d.buttons||'[]',d.enabled,d.cooldown,d.required_role,d.delete_command] }); },
-  async updateCommand(id, d) { await client.execute({ sql: 'UPDATE commands SET name=?,description=?,response=?,response_type=?,embed_title=?,embed_description=?,embed_color=?,embed_image=?,embed_footer=?,buttons=?,enabled=?,cooldown=?,required_role=?,delete_command=?,updated_at=CURRENT_TIMESTAMP WHERE id=?', args: [d.name,d.description,d.response,d.response_type,d.embed_title,d.embed_description,d.embed_color,d.embed_image,d.embed_footer||'',d.buttons||'[]',d.enabled,d.cooldown,d.required_role,d.delete_command,id] }); },
+  async createCommand(d) { return await client.execute({ sql: 'INSERT INTO commands (name,description,response,response_type,embed_title,embed_description,embed_color,embed_image,embed_footer,buttons,components,enabled,cooldown,required_role,delete_command) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', args: [d.name,d.description,d.response,d.response_type,d.embed_title,d.embed_description,d.embed_color,d.embed_image,d.embed_footer||'',d.buttons||'[]',d.components||'[]',d.enabled,d.cooldown,d.required_role,d.delete_command] }); },
+  async updateCommand(id, d) { await client.execute({ sql: 'UPDATE commands SET name=?,description=?,response=?,response_type=?,embed_title=?,embed_description=?,embed_color=?,embed_image=?,embed_footer=?,buttons=?,components=?,enabled=?,cooldown=?,required_role=?,delete_command=?,updated_at=CURRENT_TIMESTAMP WHERE id=?', args: [d.name,d.description,d.response,d.response_type,d.embed_title,d.embed_description,d.embed_color,d.embed_image,d.embed_footer||'',d.buttons||'[]',d.components||'[]',d.enabled,d.cooldown,d.required_role,d.delete_command,id] }); },
   async deleteCommand(id) { await client.execute({ sql: 'DELETE FROM commands WHERE id=?', args: [id] }); },
   async getSetting(key) { const r = await client.execute({ sql: 'SELECT value FROM bot_settings WHERE key=?', args: [key] }); return r.rows[0]?.value || null; },
   async getAllSettings() { const r = await client.execute('SELECT * FROM bot_settings'); const s = {}; for (const row of r.rows) s[row.key] = row.value; return s; },
