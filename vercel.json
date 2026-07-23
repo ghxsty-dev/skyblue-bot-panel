@@ -1,22 +1,10 @@
 {
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    { "src": "/css/(.*)", "dest": "/public/css/$1" },
-    { "src": "/dashboard(.*)", "dest": "/public/dashboard.html" },
-    { "src": "/commands/new", "dest": "/public/command-edit.html" },
-    { "src": "/commands/edit", "dest": "/public/command-edit.html" },
-    { "src": "/commands(.*)", "dest": "/public/commands.html" },
-    { "src": "/settings(.*)", "dest": "/public/settings.html" },
-    { "src": "/logs(.*)", "dest": "/public/logs.html" },
-    { "src": "/", "dest": "/public/login.html" }
+  "rewrites": [
+    { "source": "/dashboard", "destination": "/public/dashboard.html" },
+    { "source": "/commands/new", "destination": "/public/command-edit.html" },
+    { "source": "/commands/edit", "destination": "/public/command-edit.html" },
+    { "source": "/commands", "destination": "/public/commands.html" },
+    { "source": "/settings", "destination": "/public/settings.html" },
+    { "source": "/logs", "destination": "/public/logs.html" }
   ]
 }
