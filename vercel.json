@@ -1,7 +1,50 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/public/dashboard.html"
+    },
+    {
+      "src": "/commands/new",
+      "dest": "/public/command-edit.html"
+    },
+    {
+      "src": "/commands/edit",
+      "dest": "/public/command-edit.html"
+    },
+    {
+      "src": "/commands",
+      "dest": "/public/commands.html"
+    },
+    {
+      "src": "/settings",
+      "dest": "/public/settings.html"
+    },
+    {
+      "src": "/logs",
+      "dest": "/public/logs.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/login.html"
+    }
   ]
 }
